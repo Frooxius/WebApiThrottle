@@ -3,9 +3,42 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net.Http;
+using System.Text.RegularExpressions;
 
 namespace WebApiThrottle
 {
+    public class EndpointRule
+    {
+        public readonly Regex pathRegex;
+        public readonly HttpMethod method;
+        public readonly RateLimits limits;
+
+        public EndpointRule(string pathRegex, HttpMethod method, RateLimits limits)
+            : this(new Regex(pathRegex), method, limits)
+        {
+
+        }
+
+        public EndpointRule(Regex pathRegex, HttpMethod method, RateLimits limits)
+        {
+            this.pathRegex = pathRegex;
+            this.method = method;
+            this.limits = limits;
+        }
+
+        public bool Match(RequestIdentity request)
+        {
+            if (!pathRegex.IsMatch(request.Endpoint))
+                return false;
+
+            if (method != null && method != request.Method)
+                return false;
+
+            return true;
+        }
+    }
+
     /// <summary>
     /// Rate limits policy
     /// </summary>
@@ -19,7 +52,7 @@ namespace WebApiThrottle
             ClientWhitelist = new List<string>();
             ClientRules = new Dictionary<string, RateLimits>();
             EndpointWhitelist = new List<string>();
-            EndpointRules = new Dictionary<string, RateLimits>();
+            EndpointRules = new List<EndpointRule>();
             Rates = new Dictionary<RateLimitPeriod, long>();
         }
 
@@ -82,7 +115,7 @@ namespace WebApiThrottle
 
         public List<string> EndpointWhitelist { get; set; }
 
-        public IDictionary<string, RateLimits> EndpointRules { get; set; }
+        public List<EndpointRule> EndpointRules { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether all requests, including the rejected ones, should be stacked in this order: day, hour, min, sec
@@ -111,7 +144,7 @@ namespace WebApiThrottle
 
             policy.IpRules = new Dictionary<string, RateLimits>();
             policy.ClientRules = new Dictionary<string, RateLimits>();
-            policy.EndpointRules = new Dictionary<string, RateLimits>();
+            policy.EndpointRules = new List<EndpointRule>();
             policy.EndpointWhitelist = new List<string>();
             policy.IpWhitelist = new List<string>();
             policy.ClientWhitelist = new List<string>();
@@ -136,7 +169,7 @@ namespace WebApiThrottle
                         policy.ClientRules.Add(item.Entry, rateLimit);
                         break;
                     case ThrottlePolicyType.EndpointThrottling:
-                        policy.EndpointRules.Add(item.Entry, rateLimit);
+                        policy.EndpointRules.Add(new EndpointRule(item.Entry, null, rateLimit));
                         break;
                 }
             }

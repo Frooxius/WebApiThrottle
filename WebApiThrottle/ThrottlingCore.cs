@@ -251,11 +251,12 @@ namespace WebApiThrottle
             // apply endpoint rate limits
             if (Policy.EndpointRules != null)
             {
-                var rules = Policy.EndpointRules.Where(x => identity.Endpoint.IndexOf(x.Key, 0, StringComparison.InvariantCultureIgnoreCase) != -1).ToList();
+                var rules = Policy.EndpointRules.Where(x => x.Match(identity)).ToList();
+
                 if (rules.Any())
                 {
                     // get the lower limit from all applying rules
-                    var customRate = (from r in rules let rateValue = r.Value.GetLimit(rateLimitPeriod) select rateValue).Min();
+                    var customRate = (from r in rules let rateValue = r.limits.GetLimit(rateLimitPeriod) select rateValue).Min();
 
                     if (customRate > 0)
                     {

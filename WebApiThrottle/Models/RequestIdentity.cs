@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace WebApiThrottle
 {
@@ -17,6 +18,8 @@ namespace WebApiThrottle
         public string ClientKey { get; set; }
 
         public string Endpoint { get; set; }
+
+        public HttpMethod Method { get; set; }
 
         public bool ForceWhiteList { get; set; }
     }

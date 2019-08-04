@@ -226,7 +226,8 @@ namespace WebApiThrottle
         {
             var entry = new RequestIdentity();
             entry.ClientIp = core.GetClientIp(request).ToString();
-            entry.Endpoint = request.RequestUri.AbsolutePath.ToLowerInvariant();
+            entry.Endpoint = request.RequestUri.AbsolutePath;
+            entry.Method = request.Method;
             entry.ClientKey = request.Headers.Contains("Authorization-Token") 
                 ? request.Headers.GetValues("Authorization-Token").First() 
                 : "anon";

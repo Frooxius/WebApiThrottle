@@ -54,9 +54,9 @@ namespace WebApiThrottle.WebApiDemo
 
                     //scope to endpoints
                     EndpointThrottling = true,
-                    EndpointRules = new Dictionary<string, RateLimits>
+                    EndpointRules = new List<EndpointRule>
                     {
-                        { "api/search", new RateLimits { PerSecond = 10, PerMinute = 100, PerHour = 1000 } }
+                        new EndpointRule("api/search", null, new RateLimits { PerSecond = 10, PerMinute = 100, PerHour = 1000 })
                     }
                 },
                 policyRepository: new PolicyCacheRepository(),
